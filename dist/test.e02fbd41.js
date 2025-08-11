@@ -667,7 +667,10 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"jOXmm":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _redux = require("redux");
+var _myRedux = require("./my-redux");
+var _myReduxDefault = parcelHelpers.interopDefault(_myRedux);
 const initialState = {
     firstName: "Anurag",
     lastName: "Pandey",
@@ -705,28 +708,36 @@ function reducer(state = initialState, action) {
     }
 }
 const store = (0, _redux.createStore)(reducer, window.__REDUX_DEVTOOLS_EXTENSION__?.());
-store.subscribe(()=>{
-    ageCountElement.innerHTML = store.getState().age;
+const myStore = (0, _myReduxDefault.default)(reducer);
+console.log(myStore);
+myStore.subscribe(()=>{
+    ageCountElement.innerHTML = myStore.getState().age;
 });
-ageCountElement.innerHTML = store.getState().age;
-store.dispatch({
+const unsubscribe = myStore.subscribe(()=>{
+    console.log("hey there");
+});
+ageCountElement.innerHTML = myStore.getState().age;
+myStore.dispatch({
     type: INCREAMENT
 });
-store.dispatch({
-    type: DECREAMENT,
-    payload: 20
+unsubscribe();
+console.log(myStore.getState());
+myStore.dispatch({
+    type: DECREAMENT
 });
-store.dispatch({
+console.log(myStore.getState());
+myStore.dispatch({
     type: INCREASE_BY,
     payload: 20
 });
+console.log(myStore.getState());
 ageCountElement.addEventListener("click", ()=>{
-    store.dispatch({
+    myStore.dispatch({
         type: INCREAMENT
     });
 });
 
-},{"redux":"7RvxM"}],"7RvxM":[function(require,module,exports,__globalThis) {
+},{"redux":"7RvxM","./my-redux":"1T9yH","@parcel/transformer-js/src/esmodule-helpers.js":"gN1rx"}],"7RvxM":[function(require,module,exports,__globalThis) {
 // src/utils/formatProdErrorMessage.ts
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -1064,6 +1075,37 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}]},["ha2uW","jOXmm"], "jOXmm", "parcelRequirefc40", {})
+},{}],"1T9yH":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+function myCreateStore(reducer) {
+    let state;
+    const listners = [];
+    const store = {
+        dispatch: (action)=>{
+            state = reducer(state, action);
+            listners.forEach((listner)=>{
+                listner();
+            });
+        },
+        getState: ()=>{
+            return state;
+        },
+        subscribe: (listner)=>{
+            listners.push(listner);
+            return ()=>{
+                const listnerIndex = listners.findIndex((registeredListner)=>registeredListner === listner);
+                listners.splice(listnerIndex, 1);
+            };
+        }
+    };
+    store.dispatch({
+        type: "@@INIT"
+    });
+    return store;
+}
+exports.default = myCreateStore;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gN1rx"}]},["ha2uW","jOXmm"], "jOXmm", "parcelRequirefc40", {})
 
 //# sourceMappingURL=test.e02fbd41.js.map

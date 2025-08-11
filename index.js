@@ -1,4 +1,5 @@
 import { createStore } from "redux";
+import myCreateStore from "./my-redux";
 
 const initialState = {
   firstName: "Anurag",
@@ -30,17 +31,27 @@ function reducer(state = initialState, action) {
 }
 
 const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__?.());
+const myStore = myCreateStore(reducer);
+console.log(myStore);
 
-store.subscribe(() => {
-  ageCountElement.innerHTML = store.getState().age;
+myStore.subscribe(() => {
+  ageCountElement.innerHTML = myStore.getState().age;
 });
 
-ageCountElement.innerHTML = store.getState().age;
+const unsubscribe = myStore.subscribe(() => {
+  console.log("hey there");
+});
 
-store.dispatch({ type: INCREAMENT });
-store.dispatch({ type: DECREAMENT, payload: 20 });
-store.dispatch({ type: INCREASE_BY, payload: 20 });
+ageCountElement.innerHTML = myStore.getState().age;
+
+myStore.dispatch({ type: INCREAMENT });
+unsubscribe();
+console.log(myStore.getState());
+myStore.dispatch({ type: DECREAMENT });
+console.log(myStore.getState());
+myStore.dispatch({ type: INCREASE_BY, payload: 20 });
+console.log(myStore.getState());
 
 ageCountElement.addEventListener("click", () => {
-  store.dispatch({ type: INCREAMENT });
+  myStore.dispatch({ type: INCREAMENT });
 });
