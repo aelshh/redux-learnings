@@ -1,29 +1,71 @@
 import { createStore } from "redux";
-import myCreateStore from "./my-redux";
+import { productsList } from "./productsList";
 
 const initialState = {
-  firstName: "Anurag",
-  lastName: "Pandey",
-  age: 0,
+  products: productsList,
+  cartItems: [],
+  wishList: [],
 };
 
-const INCREAMENT = "age/increament";
-const DECREAMENT = "age/decreament";
-const INCREASE_BY = "age/increaseBy";
-const DECREASE_BY = "age/decreaseBy";
+const CART_ADD_ITEM = "cart/addItem";
+const CART_REMOVE_ITEM = "cart/removeItem";
+const CART_INCREASE_ITEM_QUANTITY = "cart/increaseItemQuantity";
+const CART_DECREASE_ITEM_QUANTITY = "cart/decreaseItemQuantity";
 
-const ageCountElement = document.querySelector(".age-count");
+const WISHLIST_ADD_ITEM = "whislist/addItem";
+const WISHLIST_REMOVE_ITEM = "whishlsit/removeItem";
 
 function reducer(state = initialState, action) {
   switch (action.type) {
-    case INCREAMENT:
-      return { ...state, age: state.age + 1 };
-    case DECREAMENT:
-      return { ...state, age: state.age - 1 };
-    case INCREASE_BY:
-      return { ...state, age: state.age + action.payload };
-    case DECREASE_BY:
-      return { ...state, age: state.age - action.payload };
+    case CART_ADD_ITEM:
+      return { ...state, cartItems: [...state.cartItems, action.payload] };
+
+    case CART_REMOVE_ITEM:
+      return {
+        ...state,
+        cartItems: state.cartItems.filter(
+          (cartItem) => cartItem.productId !== action.payload.productId
+        ),
+      };
+
+    case CART_INCREASE_ITEM_QUANTITY:
+      return {
+        ...state,
+        cartItems: state.cartItems.map((cartItem) => {
+          if (cartItem.productId === action.payload.productId) {
+            return { ...cartItem, quantity: cartItem.quantity + 1 };
+          }
+
+          return cartItem;
+        }),
+      };
+
+    case CART_DECREASE_ITEM_QUANTITY:
+      return {
+        ...state,
+        cartItems: state.cartItems
+          .map((cartItem) => {
+            if (cartItem.productId === action.payload.productId) {
+              return { ...cartItem, quantity: cartItem.quantity - 1 };
+            }
+            return cartItem;
+          })
+          .filter((cartItem) => cartItem.quantity > 0),
+      };
+
+    case WISHLIST_ADD_ITEM:
+      return {
+        ...state,
+        wishList: [...state.wishList, action.payload.productId],
+      };
+
+    case WISHLIST_REMOVE_ITEM:
+      return {
+        ...state,
+        wishList: state.wishList.filter(
+          (productId) => productId !== action.payload.productId
+        ),
+      };
 
     default:
       return state;
@@ -31,27 +73,48 @@ function reducer(state = initialState, action) {
 }
 
 const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__?.());
-const myStore = myCreateStore(reducer);
-console.log(myStore);
 
-myStore.subscribe(() => {
-  ageCountElement.innerHTML = myStore.getState().age;
+store.dispatch({
+  type: CART_ADD_ITEM,
+  payload: { productId: 2, quantity: 4 },
+});
+store.dispatch({
+  type: CART_ADD_ITEM,
+  payload: { productId: 4, quantity: 1 },
 });
 
-const unsubscribe = myStore.subscribe(() => {
-  console.log("hey there");
+store.dispatch({
+  type: CART_INCREASE_ITEM_QUANTITY,
+  payload: { productId: 2 },
 });
 
-ageCountElement.innerHTML = myStore.getState().age;
+store.dispatch({
+  type: CART_DECREASE_ITEM_QUANTITY,
+  payload: { productId: 2 },
+});
+store.dispatch({
+  type: CART_DECREASE_ITEM_QUANTITY,
+  payload: { productId: 2 },
+});
+store.dispatch({
+  type: CART_DECREASE_ITEM_QUANTITY,
+  payload: { productId: 2 },
+});
+store.dispatch({
+  type: CART_DECREASE_ITEM_QUANTITY,
+  payload: { productId: 2 },
+});
+store.dispatch({
+  type: CART_DECREASE_ITEM_QUANTITY,
+  payload: { productId: 2 },
+});
 
-myStore.dispatch({ type: INCREAMENT });
-unsubscribe();
-console.log(myStore.getState());
-myStore.dispatch({ type: DECREAMENT });
-console.log(myStore.getState());
-myStore.dispatch({ type: INCREASE_BY, payload: 20 });
-console.log(myStore.getState());
+store.dispatch({
+  type: WISHLIST_ADD_ITEM,
+  payload: { productId: 2 },
+});
 
-ageCountElement.addEventListener("click", () => {
-  myStore.dispatch({ type: INCREAMENT });
+store.dispatch({
+  type: WISHLIST_REMOVE_ITEM,
+  payload: { productId: 2 },
 });
